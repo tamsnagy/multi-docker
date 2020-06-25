@@ -1,0 +1,21 @@
+sudo: required
+services:
+    - docker
+
+before_install:
+    - docker build -t tamsnagy/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+    - docker run -e CI=true USERNAME/react-test npm test
+
+after_sucess:
+    - docker build -t tamsnagy/udemy-k8s-multi-client ./client
+    - docker build -t tamsnagy/udemy-k8s-multi-nginx ./nginx
+    - docker build -t tamsnagy/udemy-k8s-multi-server ./server
+    - docker build -t tamsnagy/udemy-k8s-multi-worker ./worker
+    # Log in to Docker CLI
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker push tamsnagy/udemy-k8s-multi-client
+    - docker push tamsnagy/udemy-k8s-multi-nginx
+    - docker push tamsnagy/udemy-k8s-multi-server
+    - docker push tamsnagy/udemy-k8s-multi-worker
